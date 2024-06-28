@@ -1,0 +1,3 @@
+query AuthenticateUser ($data: LoginDetailsInputModelInput!) {
+    authenticateUser(loginDetailsInput: $data)
+}

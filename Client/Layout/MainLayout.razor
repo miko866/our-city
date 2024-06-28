@@ -1,0 +1,159 @@
+﻿@using Blazored.LocalStorage
+@using Client.Services
+@inherits LayoutComponentBase
+
+<MudThemeProvider DefaultScrollbar="true"  Theme="_customTheme" />
+<MudDialogProvider/>
+<MudSnackbarProvider/>
+
+<MudLayout>
+    <div style="height: 100vh;">
+        <AuthorizeView>
+            <Authorized>
+                @* START Navbar *@
+                <MudAppBar Elevation="0" Class="d-flex align-content-center">
+                    <MudIconButton Icon="@Icons.Material.Filled.Menu" Color="Color.Tertiary" Edge="Edge.Start" OnClick="@DrawerToggle"/>
+                    <MudSpacer/>
+                </MudAppBar>
+                @* END Navbar *@
+
+                @* START Drawer *@
+                <MudDrawer @bind-Open="@DrawerOpen" Elevation="1" Variant="@DrawerVariant.Mini" Fixed="true" Style="z-index: 10000;">
+                    @* START Drawer Icon (open/close) version *@
+                    @if (DrawerOpen)
+                    {
+                    <MudDrawerHeader Class="mt-4 mb-3 d-block">
+                        <MudImage Height="40" Src="/images/ourcity-logo.jpg"></MudImage>
+                        <MudText Class="mt-4" Typo="Typo.h6">Modern solutions for governments.</MudText>
+                    </MudDrawerHeader>
+                    }
+                    else
+                    {
+                    <MudDrawerHeader Class="mt-4 mb-3 justify-center">
+                        <MudImage Height="40" Src="/images/ourcity-logo-mini.jpg"></MudImage>
+                    </MudDrawerHeader>
+                    }
+                    @* END Drawer Icon (open/close) version *@
+
+                    <MudNavMenu>
+                        <AuthorizeView Context="_" Roles="@GetRoles()">
+                            <MudTooltip Text="Dashboard" Arrow="true" Placement="Placement.Right">
+                                <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Dashboard" 
+                                            Href="@Helpers.RouteHelpers.DASHBOARD_ROUTE">Dashboard</MudNavLink>
+                            </MudTooltip>
+                        </AuthorizeView>
+
+                        <AuthorizeView Context="_" Roles="@GetRoles()">
+                            <MudTooltip Text="Prehľad Používateľov" Arrow="true" Placement="Placement.Right">
+                                <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Person"
+                                            Href="@Helpers.RouteHelpers.USER_MANAGEMENT_ROUTE">Používatelia</MudNavLink>
+                            </MudTooltip>
+                        </AuthorizeView>
+
+                        <AuthorizeView Context="_" Roles="@GetRoles()">
+                            <MudTooltip Text="Prehľad Organizácií" Arrow="true" Placement="Placement.Right">
+                                <MudNavLink Match="NavLinkMatch.Prefix" Icon="@Icons.Material.Filled.Workspaces"
+                                            Href="@Helpers.RouteHelpers.ORGANISATIONS_ROUTE">Organizácie</MudNavLink>
+                            </MudTooltip>
+                        </AuthorizeView>
+
+                    </MudNavMenu>
+                    <MudSpacer></MudSpacer>
+
+                    @* START Drawer Avatar *@
+                    <div class="@(DrawerOpen ? "ml-3 mb-2 d-flex align-center" : "d-flex align-center justify-center mb-2")">
+                        <MudAvatar Color="Color.Primary" Style="height:33px; width:33px; font-size:1rem;">@(!string.IsNullOrEmpty(DisplayName) ? DisplayName[0] : "U")</MudAvatar>
+                        @if (DrawerOpen)
+                        {
+                        <MudText Typo="Typo.body2" Class="ml-3 d-flex center-text"> <strong>@DisplayName</strong> </MudText>
+                        }
+                    </div>
+                    @* END Drawer Avatar *@
+
+                    <MudNavMenu Class="pb-4">
+                        <MudTooltip Text="Logout" Arrow="true" Placement="Placement.Right">
+                            <MudNavLink Match="NavLinkMatch.All" Icon="@Icons.Material.Filled.Logout" OnClick="Logout">Logout</MudNavLink>
+                        </MudTooltip>
+                    </MudNavMenu>
+
+                </MudDrawer>
+                @* END Drawer *@
+            </Authorized>
+        </AuthorizeView>
+
+        <MudMainContent Class="pt-16 pb-10 px-4">
+            <MudContainer Class="mt-6">
+                @Body
+            </MudContainer>
+        </MudMainContent>
+    </div>
+</MudLayout>
+
+@code {
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+    
+    [Inject] AuthenticationStateProvider? AuthenticationStateProvider { get; set; }
+    [Inject] ILocalStorageService? LocalStorageService { get; set; }
+    [Inject] AuthTokenService? AuthTokenService { get; set; }
+    [Inject] NavigationManager? NavigationManager { get; set; }
+
+    private string? DisplayName { get; set; }
+
+    private bool DrawerOpen { get; set; }
+
+    private async Task DrawerToggle()
+    {
+        DrawerOpen = !DrawerOpen;
+        await LocalStorageService!.SetItemAsync("drawerState", DrawerOpen);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        DrawerOpen = await LocalStorageService!.GetItemAsync<bool>("drawerState");
+        
+        AuthenticationState authState = await AuthenticationStateTask!;
+        
+        DisplayName = authState.User.Claims.FirstOrDefault(x => x.Type == "given_name")?.Value;
+    }
+
+    private static string GetRoles()
+    {
+        return $"{Shared.Helpers.Constants.Roles.User}, {Shared.Helpers.Constants.Roles.Admin}";
+    }
+
+    private async Task Logout()
+    {
+        await LocalStorageService!.RemoveItemAsync("token");
+        AuthTokenService!.SetAuthToken(string.Empty);
+        await AuthenticationStateProvider!.GetAuthenticationStateAsync();
+        NavigationManager!.NavigateTo(Helpers.RouteHelpers.LOGIN_ROUTE, forceLoad: true);
+    }
+
+    readonly MudTheme _customTheme = new()
+    {
+        Palette = new PaletteLight()
+        {
+            Primary = "#fe9000",
+            Secondary = "#001524",
+            Tertiary = "#ffffff",
+            AppbarBackground = "#001524",
+        },
+        
+        LayoutProperties = new LayoutProperties()
+        {
+            DrawerMiniWidthLeft = "64px"
+        },
+        
+        ZIndex = new ZIndex()
+        {
+          Dialog = 100000,
+        },
+        
+    };
+}
+
+<style>
+    .mud-tooltip-root {
+        width: 100% !important;
+    }
+</style>

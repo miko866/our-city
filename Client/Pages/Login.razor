@@ -1,0 +1,138 @@
+@attribute [Route(Helpers.RouteHelpers.LOGIN_ROUTE)]
+
+@using Blazored.LocalStorage
+@using Client.Services.GraphQLServices
+@using Microsoft.IdentityModel.Tokens
+@using Shared.InputModels.User
+@using Shared.Validators.UserValidator
+
+<MudGrid>
+    <MudItem xs="12" Class="d-flex align-center justify-center pb-8">
+        <img src="images/ourcity-logo.jpg" width="400px" alt="substring logo"/>
+    </MudItem>
+    
+    <MudItem xs="12" Class="d-flex justify-center">
+        <MudForm Model="@model" @ref="@form" Validation="@(authUserValidator.ValidateValue)" ValidationDelay="0">
+            <MudTextField T="string"
+                          For="@(() => model.UserName)"
+                          @bind-Value="model.UserName"
+                          Immediate="true"
+                          Label="Username"
+                          Variant="Variant.Outlined"
+                          Style="width:450px;"
+                          Required="true"/>
+
+            <MudTextField T="string"
+                          For="@(() => model.Password)"
+                          @bind-Value="model.Password"
+                          Variant="Variant.Outlined"
+                          Style="width:450px;"
+                          Class="mt-4"
+                          Label="Password"
+                          InputType="@PasswordInput"
+                          Immediate="true"
+                          Adornment="Adornment.End"
+                          AdornmentIcon="@PasswordInputIcon"
+                          OnAdornmentClick="ShowPassword"
+                          AdornmentAriaLabel="Show Password"
+                          OnKeyDown="@(async (args) => { if (args.Key == "Enter") { await HandleLogin(); } })"
+                          Required="true"/>
+
+            <MudButton Variant="Variant.Filled"
+                       Size="Size.Large"
+                       Color="Color.Primary"
+                       FullWidth="true"
+                       Class="ml-auto mt-8"
+                       OnClick="HandleLogin">
+                Login
+            </MudButton>
+        </MudForm>
+    </MudItem>
+</MudGrid>
+
+@code {
+    [Inject] HttpClient HttpClient { get; set; }
+    [Inject] AuthenticationStateProvider? AuthenticationStateProvider { get; set; }
+    [Inject] ILocalStorageService? LocalStorageService { get; set; }
+    [Inject] NavigationManager? NavigationManager { get; set; }
+    [Inject] private IAuthService? AuthService { get; set; }
+    
+    [CascadingParameter] private Task<AuthenticationState>? AuthenticationStateTask { get; set; }
+    
+    MudForm form;
+    LoginDetailsInputModel model = new LoginDetailsInputModel();
+    AuthUserValidator authUserValidator = new AuthUserValidator();
+    
+    private bool PasswordIsSnow { get; set; }
+    private InputType PasswordInput { get; set; }
+    private string PasswordInputIcon { get; set; }
+    private LoginDetailsInputModelInput User { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        AuthenticationState authState = await AuthenticationStateTask!;
+        if (authState.User.Identity!.IsAuthenticated)
+        {
+            NavigationManager!.NavigateTo(Helpers.RouteHelpers.DASHBOARD_ROUTE);
+        }
+    }
+    
+    public Login()
+    {
+        PasswordInput = InputType.Password;
+        PasswordInputIcon =  Icons.Material.Filled.VisibilityOff;
+    }
+
+    private async Task HandleLogin()
+    {
+        if (!model.Password.IsNullOrEmpty() && !model.UserName.IsNullOrEmpty())
+        {
+            var data = new LoginDetailsInputModelInput()
+            {
+                UserName = model.UserName,
+                Password = model.Password
+            };
+        
+            string response = await AuthService!.AuthenticateUser(data);
+        
+            if (!response.IsNullOrEmpty())
+            {
+                await LocalStorageService!.SetItemAsStringAsync("token", response);
+                
+                NavigationManager!.TryGetQueryString("returnUrl", out string returnUrl);
+                if (!string.IsNullOrEmpty(returnUrl))
+                {
+                    NavigationManager!.NavigateTo(returnUrl, forceLoad: true);
+                    return;
+                }
+                
+                NavigationManager!.NavigateTo(Helpers.RouteHelpers.DASHBOARD_ROUTE, forceLoad: true);
+            }
+    
+            await AuthenticationStateProvider!.GetAuthenticationStateAsync();
+        }
+    }
+
+    private void ShowPassword()
+    {
+        if (PasswordIsSnow)
+        {
+            PasswordIsSnow = false;
+            PasswordInputIcon = Icons.Material.Filled.VisibilityOff;
+            PasswordInput = InputType.Password;
+        }
+        else
+        {
+            PasswordIsSnow = true;
+            PasswordInputIcon = Icons.Material.Filled.Visibility;
+            PasswordInput = InputType.Text;
+        }
+    }
+
+}
+
+<style>
+    .color-white {
+        color: white;
+    }
+</style>

@@ -1,0 +1,66 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: ourcitybackendtesting-service
+  namespace: our-city
+spec:
+  selector:
+    app: our-city.backend.testing
+  ports:
+    - protocol: "TCP"
+      port: 8080
+      targetPort: 8080
+  type: NodePort
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ourcitybackendtesting-ingress
+  namespace: our-city
+  annotations:
+    nginx.ingress.kubernetes.io/proxy-body-size: 100m
+spec:
+  rules:
+    - host: ourcity-testing.substring.dev
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: ourcitybackendtesting-service
+                port:
+                  number: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: our-city.backend-testing-deployment
+  namespace: our-city
+  labels:
+    app: our-city.backend.testing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: our-city.backend.testing
+  template:
+    metadata:
+      labels:
+        app: our-city.backend.testing
+    spec:
+      containers:
+        - name: ourcity-backend-testing
+<<<<<<< HEAD
+          image: 'office.substring.ch:5050/our-city/ourcity.backend:v0.15.0'
+=======
+          image: 'office.substring.ch:5050/our-city/ourcity.backend:v0.18.1'
+>>>>>>> main
+          imagePullPolicy: "Always"
+          ports:
+            - containerPort: 8080
+          env:
+            - name: "ASPNETCORE_ENVIRONMENT"
+              value: "Testing"
+      imagePullSecrets:
+        - name: ourcity-docker-registry

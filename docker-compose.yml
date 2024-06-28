@@ -1,0 +1,76 @@
+services:
+  #######################################################
+  #  PostgreSQL
+  #  Main database for the application
+  #######################################################
+  database:
+    image: postgres:16.1-alpine
+    container_name: our-city-database
+    hostname: our-city-database
+    restart: always
+    environment:
+      - POSTGRES_DB=${DB_POSTGRES_DB}
+      - POSTGRES_USER=${DB_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${DB_POSTGRES_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - database_data_our_city:/var/lib/postgresql/data
+    networks:
+      - ourcity_app_network
+        
+  #######################################################
+  #  PostgreSQL
+  #  Integration Tests database for the application
+  #######################################################
+  test-database:
+    image: postgres:16.1-alpine
+    container_name: our-city-test-database
+    hostname: our-city-test-database
+    restart: always
+    environment:
+      - POSTGRES_DB=${DB_POSTGRES_TEST_DB}
+      - POSTGRES_USER=${DB_POSTGRES_USER}
+      - POSTGRES_PASSWORD=${DB_POSTGRES_PASSWORD}
+    ports:
+      - "7000:5432"
+    volumes:
+      - database_data_our_city_integration_tests:/var/lib/postgresql/data
+    networks:
+      - ourcity_app_network
+  
+  #######################################################
+  #  Minio S3 Storage
+  #
+  #######################################################   
+  minio:
+    image: minio/minio
+    container_name: minio-storage
+    hostname: minio-storage
+    restart: always
+    environment:
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
+    ports:
+      - "9000:9000"
+      - "9090:9090"
+    command: server --console-address ":9090" /data
+    volumes:
+      - minio_storage:/data
+    networks:
+      - ourcity_app_network
+  
+#######################################################
+#  Volumes
+#######################################################
+volumes:
+  database_data_our_city: {}
+  database_data_our_city_integration_tests: {}
+  minio_storage: {}
+
+#######################################################
+#  Networks
+#######################################################
+networks:
+  ourcity_app_network:
+    driver: bridge

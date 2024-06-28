@@ -1,0 +1,21 @@
+@using Microsoft.Extensions.Logging
+@inherits ErrorBoundary
+
+@ChildContent
+
+@code {
+    [Inject] public ILogger<CustomErrorBoundary>? Logger { get; set; }
+
+    public CustomErrorBoundary()
+    {
+        MaximumErrorCount = 30;
+    }
+
+    protected override Task OnErrorAsync(Exception? exception)
+    {
+        Snackbar.Add(exception, "Chyba!");
+        Logger!.LogError(exception!, "An unhandled exception occured");
+
+        return base.OnErrorAsync(exception!);
+    }
+}

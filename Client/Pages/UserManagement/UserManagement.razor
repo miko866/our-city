@@ -1,0 +1,59 @@
+@attribute [Route(Helpers.RouteHelpers.USER_MANAGEMENT_ROUTE)]
+
+@using Client.Services.GraphQLServices
+@using Shared.Models.User
+
+<PageTitle>Používatelia</PageTitle>
+
+<MudText Typo="Typo.h3" GutterBottom="true">Prehľad používateľov</MudText>
+
+<MudTable Items="@Users" Dense="@dense" Hover="@hover" Bordered="@bordered" Striped="@striped">
+    <ToolBarContent>
+        <MudText Typo="Typo.h6">Zoznam používateľov</MudText>
+        <MudSpacer />
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Meno</MudTh>
+        <MudTh>Priezvisko</MudTh>
+        <MudTh>Prezívka</MudTh>
+        <MudTh>Email</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Meno">@context.FirstName</MudTd>
+        <MudTd DataLabel="Priezvisko">@context.LastName</MudTd>
+        <MudTd DataLabel="Prezívka">@context.UserName</MudTd>
+        <MudTd DataLabel="Email">@context.Email</MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager />
+    </PagerContent>
+</MudTable>
+
+
+@code {
+    
+    [Inject] IUserService UserService { get; set; }
+    
+    private IEnumerable<UserModel> Users { get; set; }
+    private readonly bool dense = false;
+    private readonly bool hover = true;
+    private readonly bool striped = false;
+    private readonly bool bordered = false;
+    
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadingIndicator.ShowLoadingIndicator(async () => {
+            try
+            {
+                Users = await UserService.GetUsers();
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception);
+                Snackbar.Add(exception, "Stala sa chyba pri načítaní dát.");
+            }
+        });
+
+    }
+    
+}

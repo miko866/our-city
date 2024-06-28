@@ -1,0 +1,80 @@
+query GetUsers {
+    users {
+        id
+        firstName
+        lastName
+        email
+        currentOrganisationId
+        dateOfBirth
+        description
+        gender
+        isDeleted
+        currentPermissions
+        roles
+        userFileItems {
+            applicationUserId
+            createdAt
+            createdBy
+            fileItemId
+            id
+            isAvatar
+            orderNr
+            updatedAt
+            updatedBy
+            fileItem {
+                altText
+                createdAt
+                createdBy
+                fileExtension
+                fileItemTypeId
+                fileName
+                href
+                id
+                updatedAt
+                updatedBy
+            }
+        }
+        userName
+        userOrganisations {
+            applicationUserId
+            createdAt
+            createdBy
+            id
+            isPrimary
+            organisationId
+            updatedAt
+            updatedBy
+            organisation {
+                createdAt
+                createdBy
+                description
+                districtId
+                id
+                latitude
+                longitude
+                name
+                updatedAt
+                updatedBy
+                zip
+            }
+            userOrganisationPermissions {
+                createdAt
+                createdBy
+                id
+                permissionId
+                updatedAt
+                updatedBy
+                userOrganisationId
+                permission {
+                    createdAt
+                    createdBy
+                    id
+                    name
+                    updatedAt
+                    updatedBy
+                }
+            }
+        }
+        visibleName
+    }
+}

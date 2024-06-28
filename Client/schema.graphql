@@ -1,0 +1,1394 @@
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+enum ApplyPolicy {
+  BEFORE_RESOLVER
+  AFTER_RESOLVER
+  VALIDATION
+}
+
+type Query {
+  "Get current environment"
+  environment: String!
+  "Get events for a selected organisation, mobile view"
+  moduleEventMobile(data: ModuleEventFilterInputModelInput!): [ModuleEventMobileModel!]!
+  "Get event by id for a selected organisation, mobile view"
+  moduleEventMobileByIdMobile(id: String!): ModuleEventMobileModel!
+  "Get radios messages for a selected organisation, mobile view"
+  moduleMunicipalRadioMobile(data: ModuleGetInputModelInput!): [ModuleMunicipalRadioMobileModel!]!
+  "Get news for a selected organisation, mobile view"
+  moduleNewsMobile(moduleGetInput: ModuleGetInputModelInput!): [ModuleNewsMobileModel!]!
+  "Get news by id for a selected organisation, mobile view"
+  moduleNewsByIdMobile(id: String!): ModuleNewsMobileModel!
+  "Get simple page for a selected organisation, mobile view"
+  moduleSimplePageMobile(data: ModuleGetInputModelInput!): [ModuleSimplePageMobileModel!]!
+  "Get special announcement for a selected organisation, mobile view"
+  moduleSpecialAnnouncementMobile(data: ModuleGetInputModelInput!): [ModuleSpecialAnnouncementMobileModel!]!
+  "Get all organisations for admin view"
+  organisations: [Organisation!]!
+  "Get all organisations as simple response for mobile app"
+  organisationsListMobile: [OrganisationsListMobileModel!]!
+  "Get organisation with modules by ID for mobile app"
+  organisationByIdMobile(id: String!): OrganisationMobileModel!
+  "Get all roles for admin view"
+  roles: [ApplicationRole!]!
+  "Get all or some roles by filter for admin view"
+  role(where: ApplicationRoleFilterInput): ApplicationRole!
+  "Create default users and seed DB. Only for Local\/Developing and Testing."
+  createDefaultUsersAndSeed: String!
+  "Authenticate user - login and get token"
+  authenticateUser(loginDetailsInput: LoginDetailsInputModelInput!): String!
+  "Get current logged user"
+  currentUser: ApplicationUser!
+  "Get all or some users by filter for admin view"
+  users(where: ApplicationUserFilterInput order: [ApplicationUserSortInput!]): [ApplicationUser!]!
+}
+
+type Mutation {
+  "Only admins can create a new user. This will create an User without Email Confirmation from Admin Page"
+  createUser(applicationUserInput: ApplicationUserInputModelInput!): ApplicationUser!
+  "Update a user by filter"
+  updateUser(applicationUserInput: ApplicationUserInputModelInput! applicationUserId: String!): ApplicationUser!
+  "Soft delete or renew for any user"
+  softDeleteUser(applicationUserId: String! isDeleted: Boolean!): Boolean!
+}
+
+input ApplicationRoleFilterInput {
+  and: [ApplicationRoleFilterInput!]
+  or: [ApplicationRoleFilterInput!]
+  id: StringOperationFilterInput
+  name: StringOperationFilterInput
+  normalizedName: StringOperationFilterInput
+  concurrencyStamp: StringOperationFilterInput
+}
+
+input ApplicationUserFilterInput {
+  and: [ApplicationUserFilterInput!]
+  or: [ApplicationUserFilterInput!]
+  firstName: StringOperationFilterInput
+  lastName: StringOperationFilterInput
+  isDeleted: BooleanOperationFilterInput
+  gender: StringOperationFilterInput
+  description: StringOperationFilterInput
+  dateOfBirth: DateTimeOperationFilterInput
+  createdAt: DateTimeOperationFilterInput
+  updatedAt: DateTimeOperationFilterInput
+  createdBy: StringOperationFilterInput
+  updatedBy: StringOperationFilterInput
+  userOrganisations: ListFilterInputTypeOfUserOrganisationFilterInput
+  userFileItems: ListFilterInputTypeOfUserFileItemFilterInput
+  roles: ListStringOperationFilterInput
+  currentPermissions: ListStringOperationFilterInput
+  currentOrganisationId: StringOperationFilterInput
+  visibleName: StringOperationFilterInput
+  id: StringOperationFilterInput
+  userName: StringOperationFilterInput
+  normalizedUserName: StringOperationFilterInput
+  email: StringOperationFilterInput
+  normalizedEmail: StringOperationFilterInput
+  emailConfirmed: BooleanOperationFilterInput
+  passwordHash: StringOperationFilterInput
+  securityStamp: StringOperationFilterInput
+  concurrencyStamp: StringOperationFilterInput
+  phoneNumber: StringOperationFilterInput
+  phoneNumberConfirmed: BooleanOperationFilterInput
+  twoFactorEnabled: BooleanOperationFilterInput
+  lockoutEnd: DateTimeOperationFilterInput
+  lockoutEnabled: BooleanOperationFilterInput
+  accessFailedCount: IntOperationFilterInput
+}
+
+input ApplicationUserSortInput {
+  firstName: SortEnumType
+  lastName: SortEnumType
+  isDeleted: SortEnumType
+  gender: SortEnumType
+  description: SortEnumType
+  dateOfBirth: SortEnumType
+  createdAt: SortEnumType
+  updatedAt: SortEnumType
+  createdBy: SortEnumType
+  updatedBy: SortEnumType
+  currentOrganisationId: SortEnumType
+  visibleName: SortEnumType
+  id: SortEnumType
+  userName: SortEnumType
+  normalizedUserName: SortEnumType
+  email: SortEnumType
+  normalizedEmail: SortEnumType
+  emailConfirmed: SortEnumType
+  passwordHash: SortEnumType
+  securityStamp: SortEnumType
+  concurrencyStamp: SortEnumType
+  phoneNumber: SortEnumType
+  phoneNumberConfirmed: SortEnumType
+  twoFactorEnabled: SortEnumType
+  lockoutEnd: SortEnumType
+  lockoutEnabled: SortEnumType
+  accessFailedCount: SortEnumType
+}
+
+"The multiplier path scalar represents a valid GraphQL multiplier path string."
+scalar MultiplierPath
+
+input StringOperationFilterInput {
+  and: [StringOperationFilterInput!]
+  or: [StringOperationFilterInput!]
+  eq: String
+  neq: String
+  contains: String
+  ncontains: String
+  in: [String]
+  nin: [String]
+  startsWith: String
+  nstartsWith: String
+  endsWith: String
+  nendsWith: String
+}
+
+input BooleanOperationFilterInput {
+  eq: Boolean
+  neq: Boolean
+}
+
+input DateTimeOperationFilterInput {
+  eq: DateTime
+  neq: DateTime
+  in: [DateTime]
+  nin: [DateTime]
+  gt: DateTime
+  ngt: DateTime
+  gte: DateTime
+  ngte: DateTime
+  lt: DateTime
+  nlt: DateTime
+  lte: DateTime
+  nlte: DateTime
+}
+
+input ListFilterInputTypeOfUserOrganisationFilterInput {
+  all: UserOrganisationFilterInput
+  none: UserOrganisationFilterInput
+  some: UserOrganisationFilterInput
+  any: Boolean
+}
+
+input ListFilterInputTypeOfUserFileItemFilterInput {
+  all: UserFileItemFilterInput
+  none: UserFileItemFilterInput
+  some: UserFileItemFilterInput
+  any: Boolean
+}
+
+input ListStringOperationFilterInput {
+  all: StringOperationFilterInput
+  none: StringOperationFilterInput
+  some: StringOperationFilterInput
+  any: Boolean
+}
+
+input IntOperationFilterInput {
+  eq: Int
+  neq: Int
+  in: [Int]
+  nin: [Int]
+  gt: Int
+  ngt: Int
+  gte: Int
+  ngte: Int
+  lt: Int
+  nlt: Int
+  lte: Int
+  nlte: Int
+}
+
+enum SortEnumType {
+  ASC
+  DESC
+}
+
+"The `DateTime` scalar represents an ISO-8601 compliant date time type."
+scalar DateTime
+
+input UserOrganisationFilterInput {
+  and: [UserOrganisationFilterInput!]
+  or: [UserOrganisationFilterInput!]
+  applicationUserId: StringOperationFilterInput
+  applicationUser: ApplicationUserFilterInput
+  organisationId: StringOperationFilterInput
+  organisation: OrganisationFilterInput
+  isPrimary: BooleanOperationFilterInput
+  userOrganisationPermissions: ListFilterInputTypeOfUserOrganisationPermissionFilterInput
+  id: StringOperationFilterInput
+  createdBy: StringOperationFilterInput
+  updatedBy: StringOperationFilterInput
+  createdAt: DateTimeOperationFilterInput
+  updatedAt: DateTimeOperationFilterInput
+}
+
+input UserFileItemFilterInput {
+  and: [UserFileItemFilterInput!]
+  or: [UserFileItemFilterInput!]
+  fileItemId: StringOperationFilterInput
+  fileItem: FileItemFilterInput
+  applicationUserId: StringOperationFilterInput
+  applicationUser: ApplicationUserFilterInput
+  isAvatar: BooleanOperationFilterInput
+  orderNr: IntOperationFilterInput
+  id: StringOperationFilterInput
+  createdBy: StringOperationFilterInput
+  updatedBy: StringOperationFilterInput
+  createdAt: DateTimeOperationFilterInput
+  updatedAt: DateTimeOperationFilterInput
+}
+
+input OrganisationFilterInput {
+  and: [OrganisationFilterInput!]
+  or: [OrganisationFilterInput!]
+  name: StringOperationFilterInput
+  zip: StringOperationFilterInput
+  districtId: StringOperationFilterInput
+  district: DistrictFilterInput
+  description: StringOperationFilterInput
+  latitude: FloatOperationFilterInput
+  longitude: FloatOperationFilterInput
+  color: StringOperationFilterInput
+  userOrganisations: ListFilterInputTypeOfUserOrganisationFilterInput
+  organisationFileItems: ListFilterInputTypeOfOrganisationFileItemFilterInput
+  organisationModuleServices: ListFilterInputTypeOfOrganisationModuleServiceFilterInput
+  id: StringOperationFilterInput
+  createdBy: StringOperationFilterInput
+  updatedBy: StringOperationFilterInput
+  createdAt: DateTimeOperationFilterInput
+  updatedAt: DateTimeOperationFilterInput
+}
+
+input ListFilterInputTypeOfUserOrganisationPermissionFilterInput {
+  all: UserOrganisationPermissionFilterInput
+  none: UserOrganisationPermissionFilterInput
+  some: UserOrganisationPermissionFilterInput
+  any: Boolean
+}
+
+input FileItemFilterInput {
+  and: [FileItemFilterInput!]
+  or: [FileItemFilterInput!]
+  fileName: StringOperationFilterInput
+  fileOriginName: StringOperationFilterInput
+  fileExtension: StringOperationFilterInput
+  href: StringOperationFilterInput
+  altText: StringOperationFilterInput
+  fileItemType: FileItemTypeFilterInput
+  fileItemTypeId: StringOperationFilterInput
+  userFileItems: ListFilterInputTypeOfUserFileItemFilterInput
+  organisationFileItems: ListFilterInputTypeOfOrganisationFileItemFilterInput
+  moduleNewsFileItems: ListFilterInputTypeOfModuleNewsFileItemFilterInput
+  moduleEventFileItems: ListFilterInputTypeOfModuleEventFileItemFilterInput
+  moduleSimplePageFileItems: ListFilterInputTypeOfModuleSimplePageFileItemFilterInput
+  id: StringOperationFilterInput
+  createdBy: StringOperationFilterInput
+  updatedBy: StringOperationFilterInput
+  createdAt: DateTimeOperationFilterInput
+  updatedAt: DateTimeOperationFilterInput
+}
+
+input DistrictFilterInput {
+  and: [DistrictFilterInput!]
+  or: [DistrictFilterInput!]
+  name: StringOperationFilterInput
+  abbreviation: StringOperationFilterInput
+  stateId: StringOperationFilterInput
+  state: StateFilterInput
+  organisations: ListFilterInputTypeOfOrganisationFilterInput
+  id: StringOperationFilterInput
+  createdBy: StringOperationFilterInput
+  updatedBy: StringOperationFilterInput
+  createdAt: DateTimeOperationFilterInput
+  updatedAt: DateTimeOperationFilterInput
+}
+
+input FloatOperationFilterInput {
+  eq: Float
+  neq: Float
+  in: [Float]
+  nin: [Float]
+  gt: Float
+  ngt: Float
+  gte: Float
+  ngte: Float
+  lt: Float
+  nlt: Float
+  lte: Float
+  nlte: Float
+}
+
+input ListFilterInputTypeOfOrganisationFileItemFilterInput {
+  all: OrganisationFileItemFilterInput
+  none: OrganisationFileItemFilterInput
+  some: OrganisationFileItemFilterInput
+  any: Boolean
+}
+
+input ListFilterInputTypeOfOrganisationModuleServiceFilterInput {
+  all: OrganisationModuleServiceFilterInput
+  none: OrganisationModuleServiceFilterInput
+  some: OrganisationModuleServiceFilterInput
+  any: Boolean
+}
+
+input UserOrganisationPermissionFilterInput {
+  and: [UserOrganisationPermissionFilterInput!]
+  or: [UserOrganisationPermissionFilterInput!]
+  userOrganisationId: StringOperationFilterInput
+  applicationUser: UserOrganisationFilterInput
+  permissionId: StringOperationFilterInput
+  permission: PermissionFilterInput
+  id: StringOperationFilterInput
+  createdBy: StringOperationFilterInput
+  updatedBy: StringOperationFilterInput
+  createdAt: DateTimeOperationFilterInput
+  updatedAt: DateTimeOperationFilterInput
+}
+
+input FileItemTypeFilterInput {
+  and: [FileItemTypeFilterInput!]
+  or: [FileItemTypeFilterInput!]
+  name: EnumFileTypeOperationFilterInput
+  fileItems: ListFilterInputTypeOfFileItemFilterInput
+  id: StringOperationFilterInput
+  createdBy: StringOperationFilterInput
+  updatedBy: StringOperationFilterInput
+  createdAt: DateTimeOperationFilterInput
+  updatedAt: DateTimeOperationFilterInput
+}
+
+input ListFilterInputTypeOfModuleNewsFileItemFilterInput {
+  all: ModuleNewsFileItemFilterInput
+  none: ModuleNewsFileItemFilterInput
+  some: ModuleNewsFileItemFilterInput
+  any: Boolean
+}
+
+input ListFilterInputTypeOfModuleEventFileItemFilterInput {
+  all: ModuleEventFileItemFilterInput
+  none: ModuleEventFileItemFilterInput
+  some: ModuleEventFileItemFilterInput
+  any: Boolean
+}
+
+input ListFilterInputTypeOfModuleSimplePageFileItemFilterInput {
+  all: ModuleSimplePageFileItemFilterInput
+  none: ModuleSimplePageFileItemFilterInput
+  some: ModuleSimplePageFileItemFilterInput
+  any: Boolean
+}
+
+input StateFilterInput {
+  and: [StateFilterInput!]
+  or: [StateFilterInput!]
+  name: StringOperationFilterInput
+  abbreviation: StringOperationFilterInput
+  countryId: StringOperationFilterInput
+  country: CountryFilterInput
+  districts: ListFilterInputTypeOfDistrictFilterInput
+  id: StringOperationFilterInput
+  createdBy: StringOperationFilterInput
+  updatedBy: StringOperationFilterInput
+  createdAt: DateTimeOperationFilterInput
+  updatedAt: DateTimeOperationFilterInput
+}
+
+input ListFilterInputTypeOfOrganisationFilterInput {
+  all: OrganisationFilterInput
+  none: OrganisationFilterInput
+  some: OrganisationFilterInput
+  any: Boolean
+}
+
+input OrganisationFileItemFilterInput {
+  and: [OrganisationFileItemFilterInput!]
+  or: [OrganisationFileItemFilterInput!]
+  fileItemId: StringOperationFilterInput
+  fileItem: FileItemFilterInput
+  organisationId: StringOperationFilterInput
+  organisation: OrganisationFilterInput
+  isLogo: BooleanOperationFilterInput
+  isLogoMini: BooleanOperationFilterInput
+  orderNr: IntOperationFilterInput
+  id: StringOperationFilterInput
+  createdBy: StringOperationFilterInput
+  updatedBy: StringOperationFilterInput
+  createdAt: DateTimeOperationFilterInput
+  updatedAt: DateTimeOperationFilterInput
+}
+
+input OrganisationModuleServiceFilterInput {
+  and: [OrganisationModuleServiceFilterInput!]
+  or: [OrganisationModuleServiceFilterInput!]
+  moduleServiceId: StringOperationFilterInput
+  moduleService: ModuleServiceFilterInput
+  organisationId: StringOperationFilterInput
+  organisation: OrganisationFilterInput
+  isActive: BooleanOperationFilterInput
+  moduleNews: ListFilterInputTypeOfModuleNewsFilterInput
+  moduleEvents: ListFilterInputTypeOfModuleEventFilterInput
+  moduleMunicipalRadios: ListFilterInputTypeOfModuleMunicipalRadioFilterInput
+  moduleSpecialAnnouncements: ListFilterInputTypeOfModuleSpecialAnnouncementFilterInput
+  moduleSimplePages: ListFilterInputTypeOfModuleSimplePageFilterInput
+  id: StringOperationFilterInput
+  createdBy: StringOperationFilterInput
+  updatedBy: StringOperationFilterInput
+  createdAt: DateTimeOperationFilterInput
+  updatedAt: DateTimeOperationFilterInput
+}
+
+input PermissionFilterInput {
+  and: [PermissionFilterInput!]
+  or: [PermissionFilterInput!]
+  name: StringOperationFilterInput
+  userOrganisationPermissions: ListFilterInputTypeOfUserOrganisationPermissionFilterInput
+  id: StringOperationFilterInput
+  createdBy: StringOperationFilterInput
+  updatedBy: StringOperationFilterInput
+  createdAt: DateTimeOperationFilterInput
+  updatedAt: DateTimeOperationFilterInput
+}
+
+input EnumFileTypeOperationFilterInput {
+  eq: EnumFileType
+  neq: EnumFileType
+  in: [EnumFileType!]
+  nin: [EnumFileType!]
+}
+
+input ListFilterInputTypeOfFileItemFilterInput {
+  all: FileItemFilterInput
+  none: FileItemFilterInput
+  some: FileItemFilterInput
+  any: Boolean
+}
+
+input ModuleNewsFileItemFilterInput {
+  and: [ModuleNewsFileItemFilterInput!]
+  or: [ModuleNewsFileItemFilterInput!]
+  fileItemId: StringOperationFilterInput
+  fileItem: FileItemFilterInput
+  moduleNewsId: StringOperationFilterInput
+  moduleNews: ModuleNewsFilterInput
+  isFeaturedImage: BooleanOperationFilterInput
+  orderNr: IntOperationFilterInput
+  id: StringOperationFilterInput
+  createdBy: StringOperationFilterInput
+  updatedBy: StringOperationFilterInput
+  createdAt: DateTimeOperationFilterInput
+  updatedAt: DateTimeOperationFilterInput
+}
+
+input ModuleEventFileItemFilterInput {
+  and: [ModuleEventFileItemFilterInput!]
+  or: [ModuleEventFileItemFilterInput!]
+  fileItemId: StringOperationFilterInput
+  fileItem: FileItemFilterInput
+  moduleEventId: StringOperationFilterInput
+  moduleEvent: ModuleEventFilterInput
+  isFeaturedImage: BooleanOperationFilterInput
+  orderNr: IntOperationFilterInput
+  id: StringOperationFilterInput
+  createdBy: StringOperationFilterInput
+  updatedBy: StringOperationFilterInput
+  createdAt: DateTimeOperationFilterInput
+  updatedAt: DateTimeOperationFilterInput
+}
+
+input ModuleSimplePageFileItemFilterInput {
+  and: [ModuleSimplePageFileItemFilterInput!]
+  or: [ModuleSimplePageFileItemFilterInput!]
+  fileItemId: StringOperationFilterInput
+  fileItem: FileItemFilterInput
+  moduleSimplePageId: StringOperationFilterInput
+  moduleSimplePage: ModuleSimplePageFilterInput
+  orderNr: IntOperationFilterInput
+  id: StringOperationFilterInput
+  createdBy: StringOperationFilterInput
+  updatedBy: StringOperationFilterInput
+  createdAt: DateTimeOperationFilterInput
+  updatedAt: DateTimeOperationFilterInput
+}
+
+input CountryFilterInput {
+  and: [CountryFilterInput!]
+  or: [CountryFilterInput!]
+  name: StringOperationFilterInput
+  abbreviation: StringOperationFilterInput
+  states: ListFilterInputTypeOfStateFilterInput
+  id: StringOperationFilterInput
+  createdBy: StringOperationFilterInput
+  updatedBy: StringOperationFilterInput
+  createdAt: DateTimeOperationFilterInput
+  updatedAt: DateTimeOperationFilterInput
+}
+
+input ListFilterInputTypeOfDistrictFilterInput {
+  all: DistrictFilterInput
+  none: DistrictFilterInput
+  some: DistrictFilterInput
+  any: Boolean
+}
+
+input ModuleServiceFilterInput {
+  and: [ModuleServiceFilterInput!]
+  or: [ModuleServiceFilterInput!]
+  name: StringOperationFilterInput
+  icon: StringOperationFilterInput
+  description: StringOperationFilterInput
+  moduleType: StringOperationFilterInput
+  organisationModuleServices: ListFilterInputTypeOfOrganisationModuleServiceFilterInput
+  id: StringOperationFilterInput
+  createdBy: StringOperationFilterInput
+  updatedBy: StringOperationFilterInput
+  createdAt: DateTimeOperationFilterInput
+  updatedAt: DateTimeOperationFilterInput
+}
+
+input ListFilterInputTypeOfModuleNewsFilterInput {
+  all: ModuleNewsFilterInput
+  none: ModuleNewsFilterInput
+  some: ModuleNewsFilterInput
+  any: Boolean
+}
+
+input ListFilterInputTypeOfModuleEventFilterInput {
+  all: ModuleEventFilterInput
+  none: ModuleEventFilterInput
+  some: ModuleEventFilterInput
+  any: Boolean
+}
+
+input ListFilterInputTypeOfModuleMunicipalRadioFilterInput {
+  all: ModuleMunicipalRadioFilterInput
+  none: ModuleMunicipalRadioFilterInput
+  some: ModuleMunicipalRadioFilterInput
+  any: Boolean
+}
+
+input ListFilterInputTypeOfModuleSpecialAnnouncementFilterInput {
+  all: ModuleSpecialAnnouncementFilterInput
+  none: ModuleSpecialAnnouncementFilterInput
+  some: ModuleSpecialAnnouncementFilterInput
+  any: Boolean
+}
+
+input ListFilterInputTypeOfModuleSimplePageFilterInput {
+  all: ModuleSimplePageFilterInput
+  none: ModuleSimplePageFilterInput
+  some: ModuleSimplePageFilterInput
+  any: Boolean
+}
+
+input ModuleNewsFilterInput {
+  and: [ModuleNewsFilterInput!]
+  or: [ModuleNewsFilterInput!]
+  title: StringOperationFilterInput
+  shorText: StringOperationFilterInput
+  context: StringOperationFilterInput
+  urlLink: StringOperationFilterInput
+  videoLink: StringOperationFilterInput
+  organisationModuleServiceId: StringOperationFilterInput
+  organisationModuleService: OrganisationModuleServiceFilterInput
+  tagModuleNews: ListFilterInputTypeOfModuleNewsTagFilterInput
+  metaDataModuleNews: ListFilterInputTypeOfModuleNewsMetaDataFilterInput
+  moduleNewsFileItems: ListFilterInputTypeOfModuleNewsFileItemFilterInput
+  id: StringOperationFilterInput
+  createdBy: StringOperationFilterInput
+  updatedBy: StringOperationFilterInput
+  createdAt: DateTimeOperationFilterInput
+  updatedAt: DateTimeOperationFilterInput
+}
+
+input ModuleEventFilterInput {
+  and: [ModuleEventFilterInput!]
+  or: [ModuleEventFilterInput!]
+  title: StringOperationFilterInput
+  shorText: StringOperationFilterInput
+  context: StringOperationFilterInput
+  urlLink: StringOperationFilterInput
+  videoLink: StringOperationFilterInput
+  dateFrom: DateTimeOperationFilterInput
+  dateTo: DateTimeOperationFilterInput
+  organisationModuleServiceId: StringOperationFilterInput
+  organisationModuleService: OrganisationModuleServiceFilterInput
+  tagModuleEvents: ListFilterInputTypeOfModuleEventTagFilterInput
+  moduleEventFileItems: ListFilterInputTypeOfModuleEventFileItemFilterInput
+  id: StringOperationFilterInput
+  createdBy: StringOperationFilterInput
+  updatedBy: StringOperationFilterInput
+  createdAt: DateTimeOperationFilterInput
+  updatedAt: DateTimeOperationFilterInput
+}
+
+input ModuleSimplePageFilterInput {
+  and: [ModuleSimplePageFilterInput!]
+  or: [ModuleSimplePageFilterInput!]
+  title: StringOperationFilterInput
+  context: StringOperationFilterInput
+  icon: StringOperationFilterInput
+  urlLink: StringOperationFilterInput
+  videoLink: StringOperationFilterInput
+  organisationModuleServiceId: StringOperationFilterInput
+  organisationModuleService: OrganisationModuleServiceFilterInput
+  moduleSimplePageFileItems: ListFilterInputTypeOfModuleSimplePageFileItemFilterInput
+  id: StringOperationFilterInput
+  createdBy: StringOperationFilterInput
+  updatedBy: StringOperationFilterInput
+  createdAt: DateTimeOperationFilterInput
+  updatedAt: DateTimeOperationFilterInput
+}
+
+input ListFilterInputTypeOfStateFilterInput {
+  all: StateFilterInput
+  none: StateFilterInput
+  some: StateFilterInput
+  any: Boolean
+}
+
+input ModuleMunicipalRadioFilterInput {
+  and: [ModuleMunicipalRadioFilterInput!]
+  or: [ModuleMunicipalRadioFilterInput!]
+  shorText: StringOperationFilterInput
+  organisationModuleServiceId: StringOperationFilterInput
+  organisationModuleService: OrganisationModuleServiceFilterInput
+  moduleMunicipalRadioMessages: ListFilterInputTypeOfModuleMunicipalRadioMessageFilterInput
+  id: StringOperationFilterInput
+  createdBy: StringOperationFilterInput
+  updatedBy: StringOperationFilterInput
+  createdAt: DateTimeOperationFilterInput
+  updatedAt: DateTimeOperationFilterInput
+}
+
+input ModuleSpecialAnnouncementFilterInput {
+  and: [ModuleSpecialAnnouncementFilterInput!]
+  or: [ModuleSpecialAnnouncementFilterInput!]
+  textMessage: StringOperationFilterInput
+  severity: EnumSeverityOperationFilterInput
+  urlLink: StringOperationFilterInput
+  organisationModuleServiceId: StringOperationFilterInput
+  organisationModuleService: OrganisationModuleServiceFilterInput
+  id: StringOperationFilterInput
+  createdBy: StringOperationFilterInput
+  updatedBy: StringOperationFilterInput
+  createdAt: DateTimeOperationFilterInput
+  updatedAt: DateTimeOperationFilterInput
+}
+
+input ListFilterInputTypeOfModuleNewsTagFilterInput {
+  all: ModuleNewsTagFilterInput
+  none: ModuleNewsTagFilterInput
+  some: ModuleNewsTagFilterInput
+  any: Boolean
+}
+
+input ListFilterInputTypeOfModuleNewsMetaDataFilterInput {
+  all: ModuleNewsMetaDataFilterInput
+  none: ModuleNewsMetaDataFilterInput
+  some: ModuleNewsMetaDataFilterInput
+  any: Boolean
+}
+
+input ListFilterInputTypeOfModuleEventTagFilterInput {
+  all: ModuleEventTagFilterInput
+  none: ModuleEventTagFilterInput
+  some: ModuleEventTagFilterInput
+  any: Boolean
+}
+
+input ListFilterInputTypeOfModuleMunicipalRadioMessageFilterInput {
+  all: ModuleMunicipalRadioMessageFilterInput
+  none: ModuleMunicipalRadioMessageFilterInput
+  some: ModuleMunicipalRadioMessageFilterInput
+  any: Boolean
+}
+
+input EnumSeverityOperationFilterInput {
+  eq: EnumSeverity
+  neq: EnumSeverity
+  in: [EnumSeverity!]
+  nin: [EnumSeverity!]
+}
+
+input ModuleNewsTagFilterInput {
+  and: [ModuleNewsTagFilterInput!]
+  or: [ModuleNewsTagFilterInput!]
+  tagId: StringOperationFilterInput
+  tag: TagFilterInput
+  moduleNewsId: StringOperationFilterInput
+  moduleNews: ModuleNewsFilterInput
+  id: StringOperationFilterInput
+  createdBy: StringOperationFilterInput
+  updatedBy: StringOperationFilterInput
+  createdAt: DateTimeOperationFilterInput
+  updatedAt: DateTimeOperationFilterInput
+}
+
+input ModuleNewsMetaDataFilterInput {
+  and: [ModuleNewsMetaDataFilterInput!]
+  or: [ModuleNewsMetaDataFilterInput!]
+  metaDataId: StringOperationFilterInput
+  metaData: MetaDataFilterInput
+  moduleNewsId: StringOperationFilterInput
+  moduleNews: ModuleNewsFilterInput
+  id: StringOperationFilterInput
+  createdBy: StringOperationFilterInput
+  updatedBy: StringOperationFilterInput
+  createdAt: DateTimeOperationFilterInput
+  updatedAt: DateTimeOperationFilterInput
+}
+
+input ModuleEventTagFilterInput {
+  and: [ModuleEventTagFilterInput!]
+  or: [ModuleEventTagFilterInput!]
+  tagId: StringOperationFilterInput
+  tag: TagFilterInput
+  moduleEventId: StringOperationFilterInput
+  moduleEvent: ModuleEventFilterInput
+  id: StringOperationFilterInput
+  createdBy: StringOperationFilterInput
+  updatedBy: StringOperationFilterInput
+  createdAt: DateTimeOperationFilterInput
+  updatedAt: DateTimeOperationFilterInput
+}
+
+input ModuleMunicipalRadioMessageFilterInput {
+  and: [ModuleMunicipalRadioMessageFilterInput!]
+  or: [ModuleMunicipalRadioMessageFilterInput!]
+  messageId: StringOperationFilterInput
+  message: MessageFilterInput
+  moduleMunicipalRadioId: StringOperationFilterInput
+  moduleMunicipalRadio: ModuleMunicipalRadioFilterInput
+  id: StringOperationFilterInput
+  createdBy: StringOperationFilterInput
+  updatedBy: StringOperationFilterInput
+  createdAt: DateTimeOperationFilterInput
+  updatedAt: DateTimeOperationFilterInput
+}
+
+input TagFilterInput {
+  and: [TagFilterInput!]
+  or: [TagFilterInput!]
+  name: StringOperationFilterInput
+  color: StringOperationFilterInput
+  tagModuleNews: ListFilterInputTypeOfModuleNewsTagFilterInput
+  tagModuleEvents: ListFilterInputTypeOfModuleEventTagFilterInput
+  id: StringOperationFilterInput
+  createdBy: StringOperationFilterInput
+  updatedBy: StringOperationFilterInput
+  createdAt: DateTimeOperationFilterInput
+  updatedAt: DateTimeOperationFilterInput
+}
+
+input MetaDataFilterInput {
+  and: [MetaDataFilterInput!]
+  or: [MetaDataFilterInput!]
+  keyValue: StringOperationFilterInput
+  metaValue: StringOperationFilterInput
+  metaDataModuleNews: ListFilterInputTypeOfModuleNewsMetaDataFilterInput
+  id: StringOperationFilterInput
+  createdBy: StringOperationFilterInput
+  updatedBy: StringOperationFilterInput
+  createdAt: DateTimeOperationFilterInput
+  updatedAt: DateTimeOperationFilterInput
+}
+
+input MessageFilterInput {
+  and: [MessageFilterInput!]
+  or: [MessageFilterInput!]
+  textMessage: StringOperationFilterInput
+  category: StringOperationFilterInput
+  moduleMunicipalRadioMessages: ListFilterInputTypeOfModuleMunicipalRadioMessageFilterInput
+  id: StringOperationFilterInput
+  createdBy: StringOperationFilterInput
+  updatedBy: StringOperationFilterInput
+  createdAt: DateTimeOperationFilterInput
+  updatedAt: DateTimeOperationFilterInput
+}
+
+type ModuleMunicipalRadioMobileModel {
+  id: String!
+  shorText: String!
+  messages: [MessageModel!]!
+  createdAt: DateTime!
+  createdBy: String!
+}
+
+input ModuleEventFilterInputModelInput {
+  dateValue: DateTime
+  tagValues: [String!]
+  organisationId: String!
+  moduleServiceId: String!
+}
+
+type ModuleEventMobileModel {
+  id: String!
+  title: String!
+  shorText: String!
+  context: String
+  urlLink: String
+  videoLink: String
+  featuredImage: String
+  dateFrom: DateTime!
+  dateTo: DateTime
+  gallery: [GalleryModel!]
+  tags: [TagModel!]
+}
+
+input ModuleGetInputModelInput {
+  organisationId: String!
+  moduleServiceId: String!
+}
+
+type ModuleNewsMobileModel {
+  id: String!
+  title: String!
+  shorText: String!
+  context: String
+  urlLink: String
+  videoLink: String
+  featuredImage: String
+  createdBy: String!
+  createdAt: DateTime!
+  gallery: [GalleryModel!]
+  tags: [TagModel!]
+  metaData: [MetaDataModel!]
+}
+
+type ModuleSimplePageMobileModel {
+  id: String!
+  title: String!
+  context: String
+  icon: String
+  urlLink: String
+  videoLink: String
+  createdAt: DateTime!
+  createdBy: String!
+  gallery: [GalleryModel!]
+}
+
+type ModuleSpecialAnnouncementMobileModel {
+  id: String!
+  textMessage: String!
+  severity: String!
+  urlLink: String!
+  createdAt: DateTime!
+  createdBy: String!
+}
+
+type Organisation {
+  name: String!
+  zip: String!
+  districtId: String!
+  district: District!
+  description: String
+  latitude: Float
+  longitude: Float
+  color: String
+  userOrganisations: [UserOrganisation!]!
+  organisationFileItems: [OrganisationFileItem!]!
+  organisationModuleServices: [OrganisationModuleService!]!
+  id: String!
+  createdBy: String!
+  updatedBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+type OrganisationsListMobileModel {
+  id: String!
+  name: String!
+  logo: String
+  logoMini: String
+}
+
+type OrganisationMobileModel {
+  id: String!
+  name: String!
+  logo: String
+  logoMini: String
+  modules: [ModuleServiceContentModel!]!
+}
+
+type ApplicationRole {
+  id: String!
+  name: String
+  normalizedName: String
+  concurrencyStamp: String
+}
+
+input LoginDetailsInputModelInput {
+  userName: String
+  email: String
+  password: String!
+}
+
+type ApplicationUser {
+  firstName: String
+  lastName: String
+  isDeleted: Boolean!
+  gender: String!
+  description: String
+  dateOfBirth: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime
+  createdBy: String!
+  updatedBy: String
+  userOrganisations: [UserOrganisation!]!
+  userFileItems: [UserFileItem!]!
+  roles: [String!]!
+  currentPermissions: [String!]!
+  currentOrganisationId: String
+  visibleName: String!
+  id: String!
+  userName: String
+  normalizedUserName: String
+  email: String
+  normalizedEmail: String
+  emailConfirmed: Boolean!
+  passwordHash: String
+  securityStamp: String
+  concurrencyStamp: String
+  phoneNumber: String
+  phoneNumberConfirmed: Boolean!
+  twoFactorEnabled: Boolean!
+  lockoutEnd: DateTime
+  lockoutEnabled: Boolean!
+  accessFailedCount: Int!
+}
+
+input ApplicationUserInputModelInput {
+  firstName: String
+  lastName: String
+  email: String
+  userName: String
+  gender: String
+  description: String
+  password: String
+  phoneNumber: String
+  dateOfBirth: DateTime
+  role: String
+}
+
+enum EnumFileType {
+  USER_IMAGE
+  USER_FILE
+  USER_VIDEO
+  ORGANISATION_IMAGE
+  ORGANISATION_FILE
+  ORGANISATION_VIDEO
+  APPLICATION_IMAGE
+  APPLICATION_FILE
+  APPLICATION_VIDEO
+  OTHER
+}
+
+enum EnumSeverity {
+  INFO
+  WARNING
+  DANGER
+}
+
+type UserFileItem {
+  fileItemId: String!
+  fileItem: FileItem!
+  applicationUserId: String!
+  applicationUser: ApplicationUser!
+  isAvatar: Boolean!
+  orderNr: Int
+  id: String!
+  createdBy: String!
+  updatedBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+type ModuleServiceContentModel {
+  moduleSpecialAnnouncements: [ModuleSpecialAnnouncementMobileModel!]
+  moduleSimplePages: [ModuleSimplePageMobileModel!]
+  id: String!
+  name: String!
+  icon: String!
+  description: String
+  moduleType: String!
+}
+
+type OrganisationModuleService {
+  moduleServiceId: String!
+  moduleService: ModuleService!
+  organisationId: String!
+  organisation: Organisation!
+  isActive: Boolean!
+  moduleNews: [ModuleNews!]!
+  moduleEvents: [ModuleEvent!]!
+  moduleMunicipalRadios: [ModuleMunicipalRadio!]!
+  moduleSpecialAnnouncements: [ModuleSpecialAnnouncement!]!
+  moduleSimplePages: [ModuleSimplePage!]!
+  id: String!
+  createdBy: String!
+  updatedBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+type OrganisationFileItem {
+  fileItemId: String!
+  fileItem: FileItem!
+  organisationId: String!
+  organisation: Organisation!
+  isLogo: Boolean!
+  isLogoMini: Boolean!
+  orderNr: Int
+  id: String!
+  createdBy: String!
+  updatedBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+type UserOrganisation {
+  applicationUserId: String!
+  applicationUser: ApplicationUser!
+  organisationId: String!
+  organisation: Organisation!
+  isPrimary: Boolean!
+  userOrganisationPermissions: [UserOrganisationPermission!]!
+  id: String!
+  createdBy: String!
+  updatedBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+type District {
+  name: String!
+  abbreviation: String!
+  stateId: String!
+  state: State!
+  organisations: [Organisation!]!
+  id: String!
+  createdBy: String!
+  updatedBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+type MetaDataModel {
+  keyValue: String!
+  metaValue: String!
+}
+
+type TagModel {
+  name: String!
+  color: String
+}
+
+type GalleryModel {
+  name: String!
+  urlLink: String!
+}
+
+type MessageModel {
+  message: String!
+  category: String!
+}
+
+type State {
+  name: String!
+  abbreviation: String!
+  countryId: String!
+  country: Country!
+  districts: [District!]!
+  id: String!
+  createdBy: String!
+  updatedBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+type UserOrganisationPermission {
+  userOrganisationId: String!
+  applicationUser: UserOrganisation!
+  permissionId: String!
+  permission: Permission!
+  id: String!
+  createdBy: String!
+  updatedBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+type ModuleSimplePage {
+  title: String!
+  context: String
+  icon: String
+  urlLink: String
+  videoLink: String
+  organisationModuleServiceId: String!
+  organisationModuleService: OrganisationModuleService!
+  moduleSimplePageFileItems: [ModuleSimplePageFileItem!]!
+  id: String!
+  createdBy: String!
+  updatedBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+type ModuleSpecialAnnouncement {
+  textMessage: String!
+  severity: EnumSeverity!
+  urlLink: String
+  organisationModuleServiceId: String!
+  organisationModuleService: OrganisationModuleService!
+  id: String!
+  createdBy: String!
+  updatedBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+type ModuleMunicipalRadio {
+  shorText: String!
+  organisationModuleServiceId: String!
+  organisationModuleService: OrganisationModuleService!
+  moduleMunicipalRadioMessages: [ModuleMunicipalRadioMessage!]!
+  id: String!
+  createdBy: String!
+  updatedBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+type ModuleEvent {
+  title: String!
+  shorText: String!
+  context: String
+  urlLink: String
+  videoLink: String
+  dateFrom: DateTime!
+  dateTo: DateTime
+  organisationModuleServiceId: String!
+  organisationModuleService: OrganisationModuleService!
+  tagModuleEvents: [ModuleEventTag!]
+  moduleEventFileItems: [ModuleEventFileItem!]!
+  id: String!
+  createdBy: String!
+  updatedBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+type ModuleNews {
+  title: String!
+  shorText: String!
+  context: String
+  urlLink: String
+  videoLink: String
+  organisationModuleServiceId: String!
+  organisationModuleService: OrganisationModuleService!
+  tagModuleNews: [ModuleNewsTag!]
+  metaDataModuleNews: [ModuleNewsMetaData!]
+  moduleNewsFileItems: [ModuleNewsFileItem!]!
+  id: String!
+  createdBy: String!
+  updatedBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+type ModuleService {
+  name: String!
+  icon: String!
+  description: String
+  moduleType: String!
+  organisationModuleServices: [OrganisationModuleService!]!
+  id: String!
+  createdBy: String!
+  updatedBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+type FileItem {
+  fileName: String!
+  fileOriginName: String!
+  fileExtension: String!
+  href: String!
+  altText: String
+  fileItemType: FileItemType!
+  fileItemTypeId: String!
+  userFileItems: [UserFileItem!]!
+  organisationFileItems: [OrganisationFileItem!]!
+  moduleNewsFileItems: [ModuleNewsFileItem!]!
+  moduleEventFileItems: [ModuleEventFileItem!]!
+  moduleSimplePageFileItems: [ModuleSimplePageFileItem!]!
+  id: String!
+  createdBy: String!
+  updatedBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+type FileItemType {
+  name: EnumFileType!
+  fileItems: [FileItem!]!
+  id: String!
+  createdBy: String!
+  updatedBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+type ModuleNewsFileItem {
+  fileItemId: String!
+  fileItem: FileItem!
+  moduleNewsId: String!
+  moduleNews: ModuleNews!
+  isFeaturedImage: Boolean!
+  orderNr: Int
+  id: String!
+  createdBy: String!
+  updatedBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+type ModuleNewsMetaData {
+  metaDataId: String!
+  metaData: MetaData!
+  moduleNewsId: String!
+  moduleNews: ModuleNews!
+  id: String!
+  createdBy: String!
+  updatedBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+type ModuleNewsTag {
+  tagId: String!
+  tag: Tag!
+  moduleNewsId: String!
+  moduleNews: ModuleNews!
+  id: String!
+  createdBy: String!
+  updatedBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+type ModuleEventFileItem {
+  fileItemId: String!
+  fileItem: FileItem!
+  moduleEventId: String!
+  moduleEvent: ModuleEvent!
+  isFeaturedImage: Boolean!
+  orderNr: Int
+  id: String!
+  createdBy: String!
+  updatedBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+type ModuleEventTag {
+  tagId: String!
+  tag: Tag!
+  moduleEventId: String!
+  moduleEvent: ModuleEvent!
+  id: String!
+  createdBy: String!
+  updatedBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+type ModuleMunicipalRadioMessage {
+  messageId: String!
+  message: Message!
+  moduleMunicipalRadioId: String!
+  moduleMunicipalRadio: ModuleMunicipalRadio!
+  id: String!
+  createdBy: String!
+  updatedBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+type ModuleSimplePageFileItem {
+  fileItemId: String!
+  fileItem: FileItem!
+  moduleSimplePageId: String!
+  moduleSimplePage: ModuleSimplePage!
+  orderNr: Int
+  id: String!
+  createdBy: String!
+  updatedBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+type Permission {
+  name: String!
+  userOrganisationPermissions: [UserOrganisationPermission!]!
+  id: String!
+  createdBy: String!
+  updatedBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+type Country {
+  name: String!
+  abbreviation: String!
+  states: [State!]!
+  id: String!
+  createdBy: String!
+  updatedBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+type Message {
+  textMessage: String!
+  category: String!
+  moduleMunicipalRadioMessages: [ModuleMunicipalRadioMessage!]!
+  id: String!
+  createdBy: String!
+  updatedBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+type Tag {
+  name: String!
+  color: String
+  tagModuleNews: [ModuleNewsTag!]
+  tagModuleEvents: [ModuleEventTag!]
+  id: String!
+  createdBy: String!
+  updatedBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+type MetaData {
+  keyValue: String!
+  metaValue: String!
+  metaDataModuleNews: [ModuleNewsMetaData!]
+  id: String!
+  createdBy: String!
+  updatedBy: String
+  createdAt: DateTime!
+  updatedAt: DateTime
+}
+
+"The cost directives is used to express the complexity of a field."
+directive @cost("Defines the complexity of the field." complexity: Int! = 1 "Defines field arguments that act as complexity multipliers." multipliers: [MultiplierPath!] defaultMultiplier: Int) on FIELD_DEFINITION

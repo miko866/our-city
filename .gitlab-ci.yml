@@ -1,0 +1,81 @@
+variables:
+  DOTNET_SDK_VERSION: "8.0.301"
+
+stages:
+  - build
+  - test
+  - dockerize
+  - deploy-development
+  - deploy-testing
+
+################################
+# Deployment
+################################
+
+build:
+  stage: build
+  image: mcr.microsoft.com/dotnet/sdk:$DOTNET_SDK_VERSION
+  script:
+    - ./k8s/bash/01_run_build_per_env.sh
+  artifacts:
+    expire_in: 1 hour
+    paths:
+      - build/
+  only:
+    refs:
+      - main
+      - testing
+      - tags
+
+test:
+  stage: test
+  allow_failure: false
+  image: mcr.microsoft.com/dotnet/sdk:$DOTNET_SDK_VERSION
+  needs:
+      - build
+  services:
+      - postgres:16.1
+  variables:
+      POSTGRES_DB: our_city_integration_tests
+      POSTGRES_USER: unicorn_user
+      POSTGRES_PASSWORD: super_magical_password
+      POSTGRES_HOST_AUTH_METHOD: trust
+  script:
+      - echo "========== Running integration tests ============"
+      - dotnet test ./build/TestServer.dll --no-build
+  only:
+      - main
+      - testing
+
+dockerize:
+  stage: dockerize
+  image:
+    name: gcr.io/kaniko-project/executor:v1.23.0-debug #https://github.com/GoogleContainerTools/kaniko/releases
+    entrypoint: [""]  
+  script:
+    - ./k8s/bash/02_run_kaniko_pipeline.sh
+  only:
+    refs:
+      - main
+      - testing
+      - tags
+
+deploy-development:
+  stage: deploy-development
+  image: dtzar/helm-kubectl
+  script:
+    - kubectl delete -n our-city --ignore-not-found=true -f ./k8s/deployment/deployment.Development.yaml
+    - kubectl apply -n our-city -f ./k8s/deployment/deployment.Development.yaml
+  only:
+    refs:
+      - main
+
+deploy-testing:
+  stage: deploy-testing
+  image: dtzar/helm-kubectl
+  script:
+    - kubectl delete -n our-city --ignore-not-found=true -f ./k8s/deployment/deployment.Testing.yaml
+    - kubectl apply -n our-city -f ./k8s/deployment/deployment.Testing.yaml
+  only:
+    refs:
+      - tags
